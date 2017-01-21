@@ -146,7 +146,7 @@ class ReadClusterer:
             umi1, umis, counts, threshold = x
             return (umi1, [umi2 for umi2 in umis
                            if edit_distance(umi1.encode('utf-8'),
-                                            umi2.encode('utf-8')) <= threshold
+                                            umi2.encode('utf-8')) == threshold
                            and counts[umi1] >= (counts[umi2] *2) - 1])
         
         call_params = [(umi1, umis, counts, threshold) for umi1 in umis]
