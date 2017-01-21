@@ -357,6 +357,10 @@ def main(argv=None):
                       default=False,
                       help=("use read length in addition to position and UMI"
                             "to identify possible duplicates [default=%default]"))
+    parser.add_option("--processes", "-p", dest="processes", type="int",
+                      default=1,
+                      help="Number of processes to use for deduping")
+
 
     # add common options (-h/--help, ...) and parse command line
     (options, args) = U.Start(parser, argv=argv)
@@ -399,6 +403,12 @@ def main(argv=None):
             raise ValueError("'--further-stats' only enabled with 'cluster' "
                              "and 'adjacency' methods")
 
+    if options.processes > 1:
+        from multiprocessing import Pool
+        process_pool = Pool(options.processes)
+    else:
+        process_pool = None
+        
     infile = pysam.Samfile(in_name, in_mode)
     outfile = pysam.Samfile(out_name, out_mode,
                             template=infile)
@@ -481,7 +491,7 @@ def main(argv=None):
 
             # set up ReadCluster functor with methods specific to
             # specified options.method
-            processor = network.ReadClusterer(options.method)
+            processor = network.ReadClusterer(options.method, pool=process_pool)
 
             # dedup using umis and write out deduped bam
             reads, umis, umi_counts, topologies, nodes = processor(
