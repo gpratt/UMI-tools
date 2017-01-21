@@ -44,7 +44,7 @@ def breadth_first_search(node, adj_list):
 def distance_thresholded_list(umi1, umis, threshold):
     '''Returns the subset of items in umis that are within an edit distance of
     threshold from umi1'''
-    return [umi2 for umi2 in umis if edit_distance(umi1, umi2) <= threshold]
+    return [umi2 for umi2 in umis if edit_distance(umi1, umi2) == threshold]
 
 
 def remove_umis(adj_list, cluster, nodes):
@@ -144,7 +144,7 @@ class ReadClusterer:
         # First filter on edit_distance, and then on counts.
 
 
-        inner = functools.partial(distance_threshold_list, umis=umis, threshold=threshold)
+        inner = functools.partial(distance_thresholded_list, umis=umis, threshold=threshold)
         adj_list = self.map_func(inner, umis)
 
         return {umi1: [umi2 for umi2 in adj_umis if counts[umi1] >= (counts[umi2] *2) - 1]
