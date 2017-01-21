@@ -10,6 +10,7 @@ network.py - Network methods for dealing with UMIs
 '''
 import collections
 import itertools
+import functools
 
 # required to make iteritems python2 and python3 compatible
 import numpy as np
@@ -142,16 +143,14 @@ class ReadClusterer:
         # in order to allow parrallelism, do this in two steps.
         # First filter on edit_distance, and then on counts.
 
-        def _inner(x):
-            umi1, umis, counts, threshold = x
-            return (umi1, [umi2 for umi2 in umis
-                           if edit_distance(umi1.encode('utf-8'),
-                                            umi2.encode('utf-8')) == threshold
-                           and counts[umi1] >= (counts[umi2] *2) - 1])
-        
-        call_params = [(umi1, umis, counts, threshold) for umi1 in umis]
-        
-        return dict(self.map_func(_inner, call_params))
+
+        inner = functools.partial(distance_threshold_list, umis=umis, threshold=threshold)
+        adj_list = self.map_func(inner, umis)
+
+        return {umi1: [umi2 for umi2 in adj_umis if counts[umi1] >= (counts[umi2] *2) - 1]
+                for umi1, adj_umis in zip(umis, adj_list)}
+
+    
 
     def _get_adj_list_null(self, umis, counts, threshold):
         ''' for methods which don't use a adjacency dictionary'''
