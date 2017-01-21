@@ -40,6 +40,12 @@ def breadth_first_search(node, adj_list):
     return found
 
 
+def distance_thresholded_list(umi1, umis, threshold):
+    '''Returns the subset of items in umis that are within an edit distance of
+    threshold from umi1'''
+    return [umi2 for umi2 in umis if edit_distance(umi1, umi2) <= threshold]
+
+
 def remove_umis(adj_list, cluster, nodes):
     '''removes the specified nodes from the cluster and returns
     the remaining nodes '''
@@ -133,10 +139,19 @@ class ReadClusterer:
         ''' identify all umis within the hamming distance threshold
         and where the counts of the first umi is > (2 * second umi counts)-1'''
 
-        return {umi: [umi2 for umi2 in umis if
-                      edit_distance(umi.encode('utf-8'),
-                                    umi2.encode('utf-8')) == threshold and
-                      counts[umi] >= (counts[umi2]*2)-1] for umi in umis}
+        # in order to allow parrallelism, do this in two steps.
+        # First filter on edit_distance, and then on counts.
+
+        def _inner(x):
+            umi1, umis, counts, threshold = x
+            return (umi1, [umi2 for umi2 in umis
+                           if edit_distance(umi1.encode('utf-8'),
+                                            umi2.encode('utf-8')) <= threshold
+                           and counts[umi1] >= (counts[umi2] *2) - 1])
+        
+        call_params = [(umi1, umis, counts, threshold) for umi1 in umis]
+        
+        return dict(self.map_func(_inner, call_params))
 
     def _get_adj_list_null(self, umis, counts, threshold):
         ''' for methods which don't use a adjacency dictionary'''
@@ -286,7 +301,7 @@ class ReadClusterer:
 
         return reads, final_umis, umi_counts
 
-    def __init__(self, cluster_method="directional"):
+    def __init__(self, cluster_method="directional", pool=None):
         ''' select the required class methods for the cluster_method'''
 
         if cluster_method == "adjacency":
@@ -324,6 +339,12 @@ class ReadClusterer:
             self.get_best = self._get_best_null
             self.reduce_clusters = self._reduce_clusters_no_network
             self.get_groups = self._group_single
+
+        if pool:
+            self.map_func = pool.map
+        else:
+            self.map_func = map
+            
 
     def __call__(self, bundle, threshold, stats=False, further_stats=False,
                  deduplicate=True):
