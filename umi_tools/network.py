@@ -126,7 +126,7 @@ class ReadClusterer:
 
         return {umi: [umi2 for umi2 in umis if
                       edit_distance(umi.encode('utf-8'),
-                                    umi2.encode('utf-8')) <= threshold]
+                                    umi2.encode('utf-8'), threshold) <= threshold]
                 for umi in umis}
 
     def _get_adj_list_directional(self, umis, counts, threshold=1):
@@ -135,7 +135,7 @@ class ReadClusterer:
 
         return {umi: [umi2 for umi2 in umis if
                       edit_distance(umi.encode('utf-8'),
-                                    umi2.encode('utf-8')) == threshold and
+                                    umi2.encode('utf-8'), threshold) == threshold and
                       counts[umi] >= (counts[umi2]*2)-1] for umi in umis}
 
     def _get_adj_list_null(self, umis, counts, threshold):

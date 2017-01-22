@@ -43,8 +43,9 @@ def get_average_umi_distance(umis):
 
     if len(umis) == 1:
         return -1
-
-    dists = [edit_distance(x.encode('utf-8'), y.encode('utf-8')) for
+    umi_length = len(umis[0])
+    
+    dists = [edit_distance(x.encode('utf-8'), y.encode('utf-8'), umi_length) for
              x, y in itertools.combinations(umis, 2)]
     return float(sum(dists))/(len(dists))
 
