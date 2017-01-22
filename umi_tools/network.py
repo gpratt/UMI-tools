@@ -145,7 +145,7 @@ class ReadClusterer:
 
         # turns out that if the umi list is short, multiproccessing takes longer
         # only use if its going to be useful. 
-        if len(umis) > 8:
+        if len(umis) > 4:
             mf = self.map_func
         else:
             mf = map
@@ -154,7 +154,7 @@ class ReadClusterer:
         adj_list = mf(inner, umis)
 
         return {umi1: [umi2 for umi2 in adj_umis if counts[umi1] >= (counts[umi2] *2) - 1]
-                for umi1, adj_umis in adj_list)}
+                for umi1, adj_umis in adj_list}
 
     
 
