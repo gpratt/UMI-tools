@@ -143,6 +143,12 @@ class ReadClusterer:
         # in order to allow parrallelism, do this in two steps.
         # First filter on edit_distance, and then on counts.
 
+        # turns out that if the umi list is short, multiproccessing takes longer
+        # only use if its going to be useful. 
+        if len(umis) > 4:
+            mf = self.map_func
+        else:
+            mf = map
 
         inner = functools.partial(distance_thresholded_list, umis=umis, threshold=threshold)
         adj_list = self.map_func(inner, umis)
