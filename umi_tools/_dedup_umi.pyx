@@ -10,6 +10,6 @@ cpdef int edit_distance(a, b, t):
     for k from 0 <= k < l:
         if aa[k] != bb[k]:
             c += 1
-            if c > t:
+            if c > thresh:
                 return c
     return c
