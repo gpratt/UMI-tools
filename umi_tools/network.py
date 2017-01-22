@@ -151,7 +151,7 @@ class ReadClusterer:
             mf = map
 
         inner = functools.partial(distance_thresholded_list, umis=umis, threshold=threshold)
-        adj_list = self.map_func(inner, umis)
+        adj_list = mf(inner, umis)
 
         return {umi1: [umi2 for umi2 in adj_umis if counts[umi1] >= (counts[umi2] *2) - 1]
                 for umi1, adj_umis in zip(umis, adj_list)}
