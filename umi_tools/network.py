@@ -18,9 +18,9 @@ import pyximport
 pyximport.install(build_in_temp=False)
 
 try:
-    from umi_tools._dedup_umi import threshold_edit_distance
+    from umi_tools._dedup_umi import edit_distance
 except:
-    from _dedup_umi import threshold_edit_distance
+    from _dedup_umi import edit_distance
 
 
 def breadth_first_search(node, adj_list):
@@ -125,8 +125,8 @@ class ReadClusterer:
         ''' identify all umis within hamming distance threshold'''
 
         return {umi: [umi2 for umi2 in umis if
-                      threshold_edit_distance(umi.encode('utf-8'),
-                                    umi2.encode('utf-8'), threshold)]
+                      edit_distance(umi.encode('utf-8'),
+                                    umi2.encode('utf-8'), threshold) <= threshold]
                 for umi in umis}
 
     def _get_adj_list_directional(self, umis, counts, threshold=1):
@@ -134,8 +134,8 @@ class ReadClusterer:
         and where the counts of the first umi is > (2 * second umi counts)-1'''
 
         return {umi: [umi2 for umi2 in umis if
-                      threshold_edit_distance(umi.encode('utf-8'),
-                                    umi2.encode('utf-8'), threshold) and
+                      edit_distance(umi.encode('utf-8'),
+                                    umi2.encode('utf-8'), threshold) == threshold and
                       counts[umi] >= (counts[umi2]*2)-1] for umi in umis}
 
     def _get_adj_list_null(self, umis, counts, threshold):
