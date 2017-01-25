@@ -131,27 +131,23 @@ class ReadClusterer:
     def _get_adj_list_adjacency(self, umis, counts, threshold):
         ''' identify all umis within hamming distance threshold'''
 
-        return {umi: [umi2 for umi2 in umis if
-                      edit_distance(umi.encode('utf-8'),
-                                    umi2.encode('utf-8')) <= threshold]
-                for umi in umis}
+        return  map(lambda umi1:
+                       (umi1, [umi2 for umi2 in umis
+                               if edit_distance(umi1, umi2) <= threshold]),
+                       umis)
 
     def _get_adj_list_directional(self, umis, counts, threshold=1):
         ''' identify all umis within the hamming distance threshold
         and where the counts of the first umi is > (2 * second umi counts)-1'''
 
-        # in order to allow parrallelism, do this in two steps.
-        # First filter on edit_distance, and then on counts.
-
-        # inner = functools.partial(distance_thresholded_list, umis=umis, threshold=threshold)
         adj_list = map(lambda umi1:
                        (umi1, [umi2 for umi2 in umis
-                               if edit_distance(umi1, umi2) == threshold]),
+                               if edit_distance(umi1, umi2) <= threshold]),
                        umis)
 
-        return {umi1: [umi2 for umi2 in adj_umis if counts[umi1] >= (counts[umi2] *2) - 1]
+        return {umi1: [umi2 for umi2 in adj_umis
+                       if counts[umi1] >= (counts[umi2] * 2) - 1]
                 for umi1, adj_umis in adj_list}
-
     
 
     def _get_adj_list_null(self, umis, counts, threshold):
