@@ -148,10 +148,10 @@ class ReadClusterer:
     def _get_adj_list_adjacency(self, umis, counts, threshold):
         ''' identify all umis within hamming distance threshold'''
 
-        return  map(lambda umi1:
+        return  dict(map(lambda umi1:
                        (umi1, [umi2 for umi2 in umis
                                if edit_distance(umi1, umi2) <= threshold]),
-                       umis)
+                       umis))
 
     def _get_adj_list_directional(self, umis, counts, threshold=1):
         ''' identify all umis within the hamming distance threshold
@@ -183,7 +183,6 @@ class ReadClusterer:
 
         found = set()
         components = list()
-
         for node in sorted(graph, key=lambda x: counts[x], reverse=True):
             if node not in found:
                 component = self.search(node, graph)
