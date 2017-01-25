@@ -159,13 +159,13 @@ class ReadClusterer:
     def _get_connected_components_adjacency(self, umis, graph, counts):
         ''' find the connected UMIs within an adjacency dictionary'''
 
-        found = list()
+        found = set()
         components = list()
 
         for node in sorted(graph, key=lambda x: counts[x], reverse=True):
             if node not in found:
                 component = breadth_first_search(node, graph)
-                found.extend(component)
+                found.update(component)
                 components.append(component)
 
         return components
